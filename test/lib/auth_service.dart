@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -28,6 +29,15 @@ class AuthService {
       return null;
     }
   }
+  Future<void> updateUserProfile(User user, String age, String weight, String height, String gender) async {
+  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    'email': user.email,
+    'age': age,
+    'weight': weight,
+    'height': height,
+    'gender': gender,
+  });
+}
 
   // Sign Out
   Future<void> signOut() async {

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:test/scanner_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'profile_screen.dart';
 
 class DetailsScreen extends StatefulWidget {
+  const DetailsScreen({super.key});
+
   @override
   _DetailsScreenState createState() => _DetailsScreenState();
 }
@@ -12,34 +14,42 @@ class _DetailsScreenState extends State<DetailsScreen> {
   final TextEditingController ageController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
-  String? gender;
+  final TextEditingController genderController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  void _saveDetails() async {
-    User? user = FirebaseAuth.instance.currentUser;
+  Future<void> _saveDetails() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("User not found. Please log in again.")),
+        const SnackBar(content: Text("Please log in")),
       );
       return;
     }
 
-    if (ageController.text.isNotEmpty &&
-        weightController.text.isNotEmpty &&
-        heightController.text.isNotEmpty &&
-        gender != null) {
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'age': ageController.text,
-        'weight': weightController.text,
-        'height': heightController.text,
-        'gender': gender,
-      }, SetOptions(merge: true));
+    final details = {
+      'age': int.tryParse(ageController.text) ?? 0,
+      'weight': double.tryParse(weightController.text) ?? 0,
+      'height': double.tryParse(heightController.text) ?? 0,
+      'gender': genderController.text.trim(),
+      'email': user.email,
+    };
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(details);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Details saved!")),
+      );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ScannerScreen()),
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
-    } else {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all the fields')),
+        SnackBar(content: Text("Error saving details: $e")),
       );
     }
   }
@@ -47,74 +57,84 @@ class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Enter Your Details")),
       body: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Enter Your Details',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: ageController,
+                  decoration: const InputDecoration(
+                    labelText: "Age",
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Age is required";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: weightController,
+                  decoration: const InputDecoration(
+                    labelText: "Weight (kg)",
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Weight is required";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: heightController,
+                  decoration: const InputDecoration(
+                    labelText: "Height (cm)",
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Height is required";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: genderController,
+                  decoration: const InputDecoration(
+                    labelText: "Gender",
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Gender is required";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _saveDetails,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text("Save Details"),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
-            TextField(
-              controller: ageController,
-              decoration: InputDecoration(labelText: 'Age'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 15),
-            TextField(
-              controller: weightController,
-              decoration: InputDecoration(labelText: 'Weight (kg)'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 15),
-            TextField(
-              controller: heightController,
-              decoration: InputDecoration(labelText: 'Height (cm)'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 15),
-            DropdownButton<String>(
-              value: gender,
-              hint: Text("Select Gender"),
-              onChanged: (String? newValue) {
-                setState(() {
-                  gender = newValue;
-                });
-              },
-              items: ["Male", "Female", "Other"]
-                  .map((gender) => DropdownMenuItem<String>(
-                        value: gender,
-                        child: Text(gender),
-                      ))
-                  .toList(),
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () async {
-                User? user = FirebaseAuth.instance.currentUser;
-                if (user != null) {
-                  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-                    'email': user.email,
-                    'age': ageController.text,
-                    'weight': weightController.text,
-                    'height': heightController.text,
-                    'gender': gender,
-                  }, SetOptions(merge: true));
-                }
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => ScannerScreen()),
-                );
-              },
-              child: Text('Next'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

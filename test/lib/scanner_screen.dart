@@ -1,201 +1,143 @@
 import 'package:flutter/material.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'barcode_scanner_screen.dart';
-import 'search_screen.dart';
-import 'shop_list_screen.dart';
+import 'nutrition_screen.dart';
 import 'profile_screen.dart';
-
-void main() {
-  runApp(MaterialApp(home: ScannerScreen()));
-}
+import 'shop_list_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
+  const ScannerScreen({super.key});
+
   @override
   _ScannerScreenState createState() => _ScannerScreenState();
 }
 
-class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _ScannerScreenState extends State<ScannerScreen> {
+  String barcode = "";
+  List<Map<String, dynamic>> cartItems = [];
   int _selectedIndex = 0;
-  List<Map<String, dynamic>> cartItems = []; // Shopping cart list
+  final TextEditingController barcodeController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+  Future<void> scanBarcode() async {
+    try {
+      var result = await BarcodeScanner.scan();
+      setState(() {
+        barcode = result.rawContent;
+      });
+      if (barcode.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NutrientScreen(barcode: barcode),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        barcode = "Error scanning: $e";
+      });
+    }
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  void scanBarcode() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BarcodeScannerScreen()),
-    );
-  }
-
-  void navigateToSearch() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchScreen(
-          onAddToCart: (item) {
-            setState(() {
-              int index = cartItems.indexWhere((cartItem) => cartItem["code"] == item["code"]);
-              if (index != -1) {
-                cartItems[index]["quantity"] += 1;
-              } else {
-                cartItems.add({...item, "quantity": 1});
-              }
-            });
-          },
+  void searchBarcode() {
+    final inputBarcode = barcodeController.text.trim();
+    if (inputBarcode.isNotEmpty) {
+      setState(() {
+        barcode = inputBarcode;
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NutrientScreen(barcode: inputBarcode),
         ),
-      ),
-    );
+      );
+      barcodeController.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a barcode")),
+      );
+    }
   }
 
-  void navigateToShopList() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ShopListScreen(cartItems: cartItems),
-      ),
-    );
-  }
-
-  void navigateToProfile() {
-    User? user = FirebaseAuth.instance.currentUser;
-    String email = user?.email ?? "No email found";
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProfileScreen(email: email),
-      ),
-    );
-  }
-
-  void _onBottomNavTap(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-
-    if (index == 1) {
-      navigateToSearch();
+    if (index == 0) {
+      // Stay on scanner screen
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ShopListScreen(cartItems: cartItems),
+        ),
+      );
     } else if (index == 2) {
-      navigateToShopList();
-    } else if (index == 3) {
-      navigateToProfile();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProfileScreen(), // No email parameter
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Shop List"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
+      appBar: AppBar(
+        title: const Text("Barcode Scanner"),
       ),
-      body: SafeArea(
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App Title
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Text(
-                "Welcome to FoodPrint",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+            Text(
+              barcode.isEmpty ? "Scan a barcode" : "Scanned: $barcode",
+              style: const TextStyle(fontSize: 20),
             ),
-
-            // Search Bar
+            const SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: TextField(
-                onTap: navigateToSearch,
-                decoration: InputDecoration(
-                  hintText: "What are you drinking?",
-                  prefixIcon: IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: navigateToSearch,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
+                controller: barcodeController,
+                decoration: const InputDecoration(
+                  labelText: "Enter Barcode",
+                  border: OutlineInputBorder(),
                 ),
+                keyboardType: TextInputType.number,
               ),
             ),
-
-            // Tab Bar
-            TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(icon: Icon(Icons.search), text: "Analyze Your Product"),
-                Tab(icon: Icon(Icons.arrow_forward), text: "Get Ingredients"),
-                Tab(icon: Icon(Icons.help), text: "Get Help"),
-              ],
-              labelColor: Colors.black,
-              indicatorColor: Colors.black,
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: searchBarcode,
+              child: const Text("Search Barcode"),
             ),
-
-            // Tab Bar View
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Analyze Your Product Tab
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: navigateToSearch,
-                          child: Text("Search Product"),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                        ),
-                        ElevatedButton(
-                          onPressed: scanBarcode,
-                          child: Text("Scan Product"),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Get Ingredients Tab - Only Scan Button
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: scanBarcode,
-                      child: Text("Scan Product"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    ),
-                  ),
-
-                  // Get Help Tab - Placeholder
-                  Center(
-                    child: Text("Help Section Coming Soon!", style: TextStyle(fontSize: 16)),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: scanBarcode,
+              child: const Text("Start Scan"),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.scanner),
+            label: 'Scan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

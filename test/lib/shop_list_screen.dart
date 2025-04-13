@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShopListScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
 
-  ShopListScreen({required this.cartItems});
+  const ShopListScreen({super.key, required this.cartItems});
 
   @override
   _ShopListScreenState createState() => _ShopListScreenState();
 }
 
 class _ShopListScreenState extends State<ShopListScreen> {
-  Map<String, int> productQuantities = {}; // Tracks quantities for each product
+  Map<String, int> productQuantities = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialize quantity for each product
     for (var product in widget.cartItems) {
       productQuantities[product["code"] ?? ""] = product["quantity"] ?? 1;
     }
@@ -35,12 +36,34 @@ class _ShopListScreenState extends State<ShopListScreen> {
     });
   }
 
+  Future<int?> _getProductRating(String barcode) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('ratings')
+          .doc(barcode)
+          .get();
+      if (doc.exists) {
+        final data = doc.data();
+        return data?['score'] as int?;
+      }
+      return null;
+    } catch (e) {
+      print("Error fetching rating: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Your Shopping List")),
+      appBar: AppBar(title: const Text("Your Shopping List")),
       body: widget.cartItems.isEmpty
-          ? Center(child: Text("No items in your shopping list yet!"))
+          ? const Center(child: Text("No items in your shopping list yet!"))
           : ListView.builder(
               itemCount: widget.cartItems.length,
               itemBuilder: (context, index) {
@@ -50,29 +73,44 @@ class _ShopListScreenState extends State<ShopListScreen> {
                 final imageUrl = product["image_url"] ?? "https://via.placeholder.com/150";
                 final quantity = productQuantities[productCode] ?? 1;
 
-                return ListTile(
-                  leading: Image.network(
-                    imageUrl,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  ),
-                  title: Text(productName),
-                  subtitle: Text("Quantity: $quantity"),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.remove, color: Colors.red),
-                        onPressed: () => decreaseQuantity(productCode),
+                return FutureBuilder<int?>(
+                  future: _getProductRating(productCode),
+                  builder: (context, snapshot) {
+                    String ratingText = "No rating";
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      ratingText = "Loading rating...";
+                    } else if (snapshot.hasData && snapshot.data != null) {
+                      ratingText = "Rating: ${snapshot.data}/5";
+                    }
+
+                    return ListTile(
+                      leading: Image.network(
+                        imageUrl,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
                       ),
-                      Text(quantity.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                      IconButton(
-                        icon: Icon(Icons.add, color: Colors.green),
-                        onPressed: () => increaseQuantity(productCode),
+                      title: Text(productName),
+                      subtitle: Text("Quantity: $quantity\n$ratingText"),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove, color: Colors.red),
+                            onPressed: () => decreaseQuantity(productCode),
+                          ),
+                          Text(
+                            quantity.toString(),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add, color: Colors.green),
+                            onPressed: () => increaseQuantity(productCode),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
             ),

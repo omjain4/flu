@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "535005139855",
-    "project_id": "test-1bd4c",
-    "storage_bucket": "test-1bd4c.firebasestorage.app"
+    "project_number": "45253054845",
+    "project_id": "labellens-87b97",
+    "storage_bucket": "labellens-87b97.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:535005139855:android:c63ea7a806dc84232731fa",
+        "mobilesdk_app_id": "1:45253054845:android:c13186a46483deea1bfc14",
         "android_client_info": {
           "package_name": "com.example.test"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC7TyMPTrjV821XVuOXQdUcTy3ipDIrRZE"
+          "current_key": "AIzaSyDt91di-mho5mewA0Aik_cEcPMwQw8oUqU"
         }
       ],
       "services": {

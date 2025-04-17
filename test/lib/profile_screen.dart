@@ -12,8 +12,10 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController maxSugarController = TextEditingController();
   final TextEditingController minFiberController = TextEditingController();
-  final TextEditingController avoidIngredientsController = TextEditingController();
-  final TextEditingController preferIngredientsController = TextEditingController();
+  final TextEditingController avoidIngredientsController =
+      TextEditingController();
+  final TextEditingController preferIngredientsController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -103,7 +105,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   double? _calculateBMI(Map<String, dynamic>? userData) {
-    if (userData == null || !userData.containsKey('weight') || !userData.containsKey('height')) {
+    if (userData == null ||
+        !userData.containsKey('weight') ||
+        !userData.containsKey('height')) {
       return null;
     }
     final weight = double.tryParse(userData['weight'].toString()) ?? 0;
@@ -118,7 +122,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("Profile")),
       body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance.collection('users').doc(user?.uid).get(),
+        future:
+            FirebaseFirestore.instance.collection('users').doc(user?.uid).get(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -134,7 +139,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Text(
                   "Hello ${user?.email ?? 'User'}",
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text("Age: ${userData?['age'] ?? 'Not set'}"),

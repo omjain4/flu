@@ -1,0 +1,2 @@
+D:/Downloads/Mini Project/flu/test/android/app/.cxx/Debug/194i534q/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/Downloads/Mini Project/flu/test/android/app/.cxx/Debug/194i534q/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -40,10 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.all(20.0),
+        padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+            colors: [
+              Color(0xFF1E3C72), // Dark blue
+              Color(0xFF2A5298), // Lighter blue
+              Color(0xFF56C596), // Soft green
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -52,25 +56,38 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Logo or Illustration
+                Container(
+                  margin: EdgeInsets.only(bottom: 24.0),
+                  child: Icon(
+                    Icons.lock_outline,
+                    size: 80,
+                    color: Colors.white,
+                  ),
+                ),
+                // Welcome Text
                 Text(
                   "Welcome Back!",
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
                 Text(
                   "Login to continue",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     color: Colors.white70,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 32),
+                // Email Input
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
@@ -83,7 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelStyle: TextStyle(color: Colors.grey[700]),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 16),
+                // Password Input
                 TextField(
                   controller: passwordController,
                   decoration: InputDecoration(
@@ -97,7 +115,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   obscureText: true,
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 24),
+                // Login Button
                 ElevatedButton(
                   onPressed: _login,
                   child: Text(
@@ -113,22 +132,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignupScreen()),
-                      );
-                    },
-                    child: Text(
-                      "Create an Account",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        decoration: TextDecoration.underline,
-                      ),
+                SizedBox(height: 16),
+                // Signup Link
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignupScreen()),
+                    );
+                  },
+                  child: Text(
+                    "Dont have an account? Create an Account",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),

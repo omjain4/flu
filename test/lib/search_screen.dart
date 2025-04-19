@@ -6,7 +6,7 @@ import 'nutrition_screen.dart'; // Import the NutrientScreen
 class SearchScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onAddToCart;
   
-  SearchScreen({required this.onAddToCart});
+  const SearchScreen({super.key, required this.onAddToCart});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -74,7 +74,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Search Food Products")),
+      appBar: AppBar(title: const Text("Search Food Products")),
       body: Column(
         children: [
           Padding(
@@ -83,7 +83,7 @@ class _SearchScreenState extends State<SearchScreen> {
               controller: searchController,
               decoration: InputDecoration(
                 hintText: "Search for food...",
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onSubmitted: searchProduct,
@@ -91,7 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
 
           isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : Expanded(
                   child: ListView.builder(
                     itemCount: searchResults.length,
@@ -105,10 +105,10 @@ class _SearchScreenState extends State<SearchScreen> {
                         onTap: () => navigateToNutritionScreen(productCode), // Navigate to details
                         trailing: ElevatedButton(
                           onPressed: () => addToCart(product),
-                          child: Text(addedProducts.contains(productCode) ? "Added" : "Add"),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: addedProducts.contains(productCode) ? Colors.grey : Colors.blue,
                           ),
+                          child: Text(addedProducts.contains(productCode) ? "Added" : "Add"),
                         ),
                       );
                     },

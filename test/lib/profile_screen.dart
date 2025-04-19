@@ -120,7 +120,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Profile")),
+      appBar: AppBar(
+        title: const Text("My Profile"),
+        backgroundColor: const Color(0xFF1E3C72),
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
       body: FutureBuilder<DocumentSnapshot>(
         future:
             FirebaseFirestore.instance.collection('users').doc(user?.uid).get(),
@@ -133,80 +138,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final bmi = _calculateBMI(userData);
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Hello ${user?.email ?? 'User'}",
-                  style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Welcome, ${user?.email ?? 'User'}",
+                          style: const TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildInfoRow("Age", userData?['age']),
+                        _buildInfoRow("Weight", "${userData?['weight']} kg"),
+                        _buildInfoRow("Height", "${userData?['height']} cm"),
+                        _buildInfoRow("Gender", userData?['gender']),
+                        _buildInfoRow("BMI",
+                            bmi != null ? bmi.toStringAsFixed(1) : "Not set"),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 10),
-                Text("Age: ${userData?['age'] ?? 'Not set'}"),
-                Text("Weight: ${userData?['weight'] ?? 'Not set'} kg"),
-                Text("Height: ${userData?['height'] ?? 'Not set'} cm"),
-                Text("Gender: ${userData?['gender'] ?? 'Not set'}"),
-                Text(
-                  "BMI: ${bmi != null ? bmi.toStringAsFixed(1) : 'Not calculated'}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
                 const Text(
-                  "Set Your Preferences",
+                  "Your Dietary Preferences",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Leave blank to use BMI-based defaults (e.g., stricter sugar limits for higher BMI)",
+                  "Leave blank to use BMI-based defaults.",
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: maxSugarController,
-                  decoration: const InputDecoration(
-                    labelText: "Max Sugar (g/100g)",
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: minFiberController,
-                  decoration: const InputDecoration(
-                    labelText: "Min Fiber (g/100g)",
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: avoidIngredientsController,
-                  decoration: const InputDecoration(
-                    labelText: "Ingredients to Avoid (comma-separated)",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: preferIngredientsController,
-                  decoration: const InputDecoration(
-                    labelText: "Preferred Ingredients (comma-separated)",
-                    border: OutlineInputBorder(),
-                  ),
-                ),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _savePreferences,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
+                _buildInputField(
+                    label: "Max Sugar (g/100g)",
+                    controller: maxSugarController),
+                const SizedBox(height: 15),
+                _buildInputField(
+                    label: "Min Fiber (g/100g)",
+                    controller: minFiberController),
+                const SizedBox(height: 15),
+                _buildInputField(
+                  label: "Ingredients to Avoid (comma-separated)",
+                  controller: avoidIngredientsController,
+                ),
+                const SizedBox(height: 15),
+                _buildInputField(
+                  label: "Preferred Ingredients (comma-separated)",
+                  controller: preferIngredientsController,
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text("Save Preferences"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E3C72),
+                      elevation: 0,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: _savePreferences,
                   ),
-                  child: const Text("Save Preferences"),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.grey[100],
+      ),
+      keyboardType: TextInputType.text,
+    );
+  }
+
+  Widget _buildInfoRow(String label, dynamic value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        "$label: ${value ?? 'Not set'}",
+        style: const TextStyle(fontSize: 16),
       ),
     );
   }

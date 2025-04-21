@@ -5,6 +5,7 @@ import 'scanner_screen.dart';
 import 'search_screen.dart';
 import 'diet_screen.dart';
 import 'shop_list_screen.dart';
+import 'login_screen.dart'; // Added to enable navigation to LoginScreen
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -170,9 +171,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-      Navigator.pushReplacement(
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(builder: (context) => const ScannerScreen()),
+        '/login', // Redirect to LoginScreen using named route
       );
     } catch (e) {
       print("Error logging out: $e");
@@ -200,6 +201,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const ShopListScreen()),
+      );
+    } else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
+    } else if (index == 4) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DietScreen()),
       );
     }
   }
@@ -516,7 +527,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icon(Icons.person_outline),
             label: 'Profile',
           ),
-            BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.food_bank_outlined),
             label: 'Diet',
           ),

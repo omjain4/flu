@@ -204,7 +204,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
         context,
         MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
-    }else if (index == 3) {
+    }else if (index == 4) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const DietScreen()),

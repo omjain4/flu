@@ -17,7 +17,7 @@ class ShopListScreen extends StatefulWidget {
 class _ShopListScreenState extends State<ShopListScreen> {
   int _selectedIndex = 2;
 
-  void _onItemTapped(int index) {
+   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -31,18 +31,20 @@ class _ShopListScreenState extends State<ShopListScreen> {
         context,
         MaterialPageRoute(builder: (context) => const SearchScreen()),
       );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ShopListScreen()),
+      );
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
-    }
-    else if (index == 3) {
+    }else if (index == 4) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const DietScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const DietScreen()),
       );
     }
   }

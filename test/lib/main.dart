@@ -13,10 +13,16 @@ import 'nutrition_screen.dart';
 import 'diet_screen.dart';
 import 'cart_provider.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
-  await FirebaseAuth.instance.setPersistence(Persistence.LOCAL); // Set local persistence
+  // Initialize Firebase without explicit options (relies on google-services.json/plist)
+  try {
+    await Firebase.initializeApp();
+    await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  } catch (e) {
+    print('Firebase initialization error: $e');
+  }
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartProvider(),
@@ -30,7 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AuthenticationWrapper(), // Use AuthenticationWrapper as the home
+      home: SplashScreen(), // Use SplashScreen with shorter timeout
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignupScreen(),
@@ -46,6 +52,46 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateBasedOnAuth();
+  }
+
+  Future<void> _navigateBasedOnAuth() async {
+    // Shorter timeout of 5 seconds to avoid hanging
+    await Future.delayed(const Duration(seconds: 5), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => AuthenticationWrapper()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            FlutterLogo(size: 100),
+            SizedBox(height: 20),
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text('Loading...', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -55,10 +101,8 @@ class AuthenticationWrapper extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.active) {
           User? user = snapshot.data;
           if (user != null) {
-            // User is authenticated, navigate to ScannerScreen
             return const ScannerScreen();
           } else {
-            // User is not authenticated, navigate to LoginScreen
             return LoginScreen();
           }
         }

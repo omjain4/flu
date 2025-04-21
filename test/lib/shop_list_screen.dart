@@ -7,9 +7,11 @@ import 'cart_provider.dart';
 import 'diet_screen.dart';
 class ShopListScreen extends StatefulWidget {
   const ShopListScreen({super.key});
+  
 
   @override
   _ShopListScreenState createState() => _ShopListScreenState();
+  
 }
 
 class _ShopListScreenState extends State<ShopListScreen> {

@@ -5,12 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'nutrition_screen.dart';
 import 'profile_screen.dart';
+import 'search_screen.dart'; // Ensure this file contains the SearchScreen class
 import 'shop_list_screen.dart';
-import 'search_screen.dart';
 import 'cart_provider.dart';
-import 'diet_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'diet_screen.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -21,6 +21,7 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> {
   String barcode = "";
+  List<Map<String, dynamic>> cartItems = [];
   int _selectedIndex = 0;
   final TextEditingController barcodeController = TextEditingController();
   List<Map<String, dynamic>> recentlyViewedItems = [];
@@ -139,13 +140,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
         barcode = result.rawContent;
       });
       if (barcode.isNotEmpty) {
-        await saveRecentlyViewedItem(barcode);
+        // Navigate immediately, save in the background
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => NutrientScreen(barcode: barcode),
           ),
-        );
+        ).then((_) async {
+          await saveRecentlyViewedItem(barcode);
+        });
       }
     } catch (e) {
       setState(() {
@@ -160,13 +163,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
       setState(() {
         barcode = inputBarcode;
       });
-      saveRecentlyViewedItem(inputBarcode);
+      // Navigate immediately, save in the background
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => NutrientScreen(barcode: inputBarcode),
         ),
-      );
+      ).then((_) async {
+        await saveRecentlyViewedItem(inputBarcode);
+      });
       barcodeController.clear();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,36 +184,32 @@ class _ScannerScreenState extends State<ScannerScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    if (index == 1) {
+    if (index == 0) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const SearchScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const ScannerScreen()),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SearchScreen()),
       );
     } else if (index == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const ShopListScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const ShopListScreen()),
       );
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const ProfileScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
-    }else if (index == 4) {
+    }else if (index == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const DietScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const DietScreen()),
       );
     }
-    
   }
 
   @override
@@ -216,10 +217,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Barcode Scanner"),
+        title: const Text(
+          "Barcode Scanner",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF1E3C72),
         elevation: 0,
-        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -233,21 +236,25 @@ class _ScannerScreenState extends State<ScannerScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      barcode.isEmpty
-                          ? "Scan a barcode to begin"
-                          : "Scanned: $barcode",
+                      barcode.isEmpty ? "Scan a barcode" : "Scanned: $barcode",
                       style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w500),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF1E3C72),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: barcodeController,
                       decoration: InputDecoration(
-                        labelText: "Enter Barcode Manually",
+                        labelText: "Enter Barcode",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         prefixIcon: const Icon(Icons.qr_code),
                       ),
                       keyboardType: TextInputType.number,
@@ -256,32 +263,32 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: ElevatedButton(
                             onPressed: searchBarcode,
-                            icon: const Icon(Icons.search),
-                            label: const Text("Search"),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2A5298),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
+                            child: const Text("Search Barcode"),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: ElevatedButton.icon(
+                          child: ElevatedButton(
                             onPressed: scanBarcode,
-                            icon: const Icon(Icons.camera_alt),
-                            label: const Text("Scan"),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
+                              backgroundColor: const Color(0xFF56C596),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
+                            child: const Text("Start Scan"),
                           ),
                         ),
                       ],
@@ -296,9 +303,10 @@ class _ScannerScreenState extends State<ScannerScreen> {
               child: Text(
                 "Recently Viewed Items",
                 style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E3C72)),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3C72),
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -328,8 +336,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                     itemCount: recentlyViewedItems.length,
                     shrinkWrap: true,
                     primary: false,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
@@ -352,7 +359,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                         child: Card(
                           elevation: 3,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -373,8 +381,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                   item['name'],
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -384,7 +393,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                 onPressed: isInCart
                                     ? null
                                     : () {
-                                        Provider.of<CartProvider>(context, listen: false)
+                                        Provider.of<CartProvider>(context,
+                                                listen: false)
                                             .addToCart({
                                           'name': item['name'],
                                           'code': item['barcode'],
@@ -397,7 +407,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                                         );
                                       },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: isInCart ? Colors.grey : const Color(0xFF56C596),
+                                  backgroundColor:
+                                      isInCart ? Colors.grey : const Color(0xFF56C596),
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),

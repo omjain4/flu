@@ -9,6 +9,7 @@ import 'scanner_screen.dart';
 import 'search_screen.dart';
 import 'shop_list_screen.dart';
 import 'profile_screen.dart';
+import 'diet_screen.dart';
 
 class NutrientScreen extends StatefulWidget {
   final String barcode;
@@ -338,6 +339,11 @@ class _NutrientScreenState extends State<NutrientScreen> {
         context,
         MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
+    }else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DietScreen()),
+      );
     }
   }
 
@@ -541,7 +547,7 @@ class _NutrientScreenState extends State<NutrientScreen> {
                 ],
               ),
             ),
-      bottomNavigationBar: BottomNavigationBar(
+bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E3C72),
         selectedItemColor: Colors.grey,
         unselectedItemColor: const Color(0xFF000000),
@@ -563,6 +569,10 @@ class _NutrientScreenState extends State<NutrientScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
+          ),
+           BottomNavigationBarItem(
+            icon: Icon(Icons.food_bank_outlined),
+            label: 'Diet',
           ),
         ],
       ),

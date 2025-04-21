@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'profile_screen.dart';
+import 'scanner_screen.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({super.key});
@@ -45,7 +45,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        MaterialPageRoute(builder: (context) => const ScannerScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -57,82 +57,157 @@ class _DetailsScreenState extends State<DetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Enter Your Details")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+      body: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF1E3C72),
+              Color(0xFF2A5298),
+              Color(0xFF56C596),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: ageController,
-                  decoration: const InputDecoration(
-                    labelText: "Age",
-                    border: OutlineInputBorder(),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icon
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 24.0),
+                    child: const Icon(
+                      Icons.person,
+                      size: 80,
+                      color: Colors.white,
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Age is required";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: weightController,
-                  decoration: const InputDecoration(
-                    labelText: "Weight (kg)",
-                    border: OutlineInputBorder(),
+                  // Title Text
+                  const Text(
+                    "Enter Your Details",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Weight is required";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: heightController,
-                  decoration: const InputDecoration(
-                    labelText: "Height (cm)",
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Provide your details to personalize your experience",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Height is required";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: genderController,
-                  decoration: const InputDecoration(
-                    labelText: "Gender",
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 32),
+                  // Age Input
+                  TextFormField(
+                    controller: ageController,
+                    decoration: InputDecoration(
+                      labelText: "Age",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Age is required";
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Gender is required";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _saveDetails,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
+                  const SizedBox(height: 16),
+                  // Weight Input
+                  TextFormField(
+                    controller: weightController,
+                    decoration: InputDecoration(
+                      labelText: "Weight (kg)",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Weight is required";
+                      }
+                      return null;
+                    },
                   ),
-                  child: const Text("Save Details"),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  // Height Input
+                  TextFormField(
+                    controller: heightController,
+                    decoration: InputDecoration(
+                      labelText: "Height (cm)",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Height is required";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Gender Input
+                  TextFormField(
+                    controller: genderController,
+                    decoration: InputDecoration(
+                      labelText: "Gender",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelStyle: TextStyle(color: Colors.grey[700]),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Gender is required";
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  // Save Button
+                  ElevatedButton(
+                    onPressed: _saveDetails,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF56C596),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Save Details",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,119 +1,208 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:provider/provider.dart';
+import 'scanner_screen.dart';
+import 'search_screen.dart';
+import 'profile_screen.dart';
+import 'cart_provider.dart';
+import 'diet_screen.dart';
 class ShopListScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> cartItems;
-
-  const ShopListScreen({super.key, required this.cartItems});
+  const ShopListScreen({super.key});
 
   @override
   _ShopListScreenState createState() => _ShopListScreenState();
 }
 
 class _ShopListScreenState extends State<ShopListScreen> {
-  Map<String, int> productQuantities = {};
+  int _selectedIndex = 2;
 
-  @override
-  void initState() {
-    super.initState();
-    for (var product in widget.cartItems) {
-      productQuantities[product["code"] ?? ""] = product["quantity"] ?? 1;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ScannerScreen()),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SearchScreen()),
+      );
+    } else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
     }
-  }
-
-  void increaseQuantity(String productCode) {
-    setState(() {
-      productQuantities[productCode] = (productQuantities[productCode] ?? 1) + 1;
-    });
-  }
-
-  void decreaseQuantity(String productCode) {
-    setState(() {
-      if (productQuantities[productCode] != null && productQuantities[productCode]! > 1) {
-        productQuantities[productCode] = productQuantities[productCode]! - 1;
-      }
-    });
-  }
-
-  Future<int?> _getProductRating(String barcode) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
-
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('ratings')
-          .doc(barcode)
-          .get();
-      if (doc.exists) {
-        final data = doc.data();
-        return data?['score'] as int?;
-      }
-      return null;
-    } catch (e) {
-      print("Error fetching rating: $e");
-      return null;
+    else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DietScreen(),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Your Shopping List")),
-      body: widget.cartItems.isEmpty
-          ? const Center(child: Text("No items in your shopping list yet!"))
-          : ListView.builder(
-              itemCount: widget.cartItems.length,
-              itemBuilder: (context, index) {
-                final product = widget.cartItems[index];
-                final productCode = product["code"] ?? "";
-                final productName = product["product_name"] ?? "Unknown Product";
-                final imageUrl = product["image_url"] ?? "https://via.placeholder.com/150";
-                final quantity = productQuantities[productCode] ?? 1;
-
-                return FutureBuilder<int?>(
-                  future: _getProductRating(productCode),
-                  builder: (context, snapshot) {
-                    String ratingText = "No rating";
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      ratingText = "Loading rating...";
-                    } else if (snapshot.hasData && snapshot.data != null) {
-                      ratingText = "Rating: ${snapshot.data}/5";
-                    }
-
-                    return ListTile(
-                      leading: Image.network(
-                        imageUrl,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text("Shopping Cart"),
+        backgroundColor: const Color(0xFF1E3C72),
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
+      body: Consumer<CartProvider>(
+        builder: (context, cartProvider, child) {
+          final cartItems = cartProvider.cartItems;
+          return Column(
+            children: [
+              Expanded(
+                child: cartItems.isEmpty
+                    ? const Center(
+                        child: Text(
+                          "Your cart is empty",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16.0),
+                        itemCount: cartItems.length,
+                        itemBuilder: (context, index) {
+                          final item = cartItems[index];
+                          return Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item['name'] ?? 'Unknown',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1E3C72),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Barcode: ${item['code']}',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.blueGrey[700],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          cartProvider.decrementItemQuantity(item['code']).then((_) {
+                                            if (cartProvider.cartItems.every((i) => i['code'] != item['code'])) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(
+                                                  content: Text("${item['name']} removed from cart!"),
+                                                ),
+                                              );
+                                            }
+                                          });
+                                        },
+                                        icon: const Icon(Icons.remove),
+                                        color: const Color(0xFF56C596),
+                                      ),
+                                      Text(
+                                        '${item['quantity']}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1E3C72),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          cartProvider.incrementItemQuantity(item['code']);
+                                        },
+                                        icon: const Icon(Icons.add),
+                                        color: const Color(0xFF56C596),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      title: Text(productName),
-                      subtitle: Text("Quantity: $quantity\n$ratingText"),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove, color: Colors.red),
-                            onPressed: () => decreaseQuantity(productCode),
-                          ),
-                          Text(
-                            quantity.toString(),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add, color: Colors.green),
-                            onPressed: () => increaseQuantity(productCode),
-                          ),
-                        ],
+              ),
+              if (cartItems.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      cartProvider.clearCart();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Cart cleared!")),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
+                    child: const Text(
+                      "Clear Cart",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: const Color(0xFF1E3C72),
+        selectedItemColor: Colors.grey,
+        unselectedItemColor: const Color(0xFF000000),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: 'Scan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart_outlined),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
+           BottomNavigationBarItem(
+            icon: Icon(Icons.food_bank_outlined),
+            label: 'Diet',
+          ),
+        ],
+      ),
     );
   }
 }

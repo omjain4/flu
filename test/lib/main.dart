@@ -15,7 +15,6 @@ import 'cart_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Initialize Firebase without explicit options (relies on google-services.json/plist)
   try {
     await Firebase.initializeApp();
     await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
@@ -36,7 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(), // Use SplashScreen with shorter timeout
+      home: SplashScreen(),
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignupScreen(),
@@ -65,7 +64,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateBasedOnAuth() async {
-    // Shorter timeout of 5 seconds to avoid hanging
     await Future.delayed(const Duration(seconds: 5), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => AuthenticationWrapper()),
@@ -76,16 +74,18 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            FlutterLogo(size: 100),
-            SizedBox(height: 20),
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text('Loading...', style: TextStyle(fontSize: 18)),
-          ],
+      body: SizedBox.expand(
+        child: Image.asset(
+          'assets/splashgif.gif',
+          fit: BoxFit.cover, // Make the GIF cover the entire screen
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Text(
+                'Failed to load splash screen',
+                style: TextStyle(color: Colors.red, fontSize: 18),
+              ),
+            ); // Fallback if GIF fails to load
+          },
         ),
       ),
     );
@@ -106,7 +106,6 @@ class AuthenticationWrapper extends StatelessWidget {
             return LoginScreen();
           }
         }
-        // Show loading indicator while checking auth state
         return const Center(child: CircularProgressIndicator());
       },
     );

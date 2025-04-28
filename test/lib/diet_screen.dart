@@ -75,7 +75,8 @@ class _DietScreenState extends State<DietScreen> {
     if (user == null) return;
 
     final today = DateTime.now();
-    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    final dateStr =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
 
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -121,23 +122,55 @@ class _DietScreenState extends State<DietScreen> {
     if (user == null) return;
 
     final fallbackData = {
-      'apple': {'calories': 52.0, 'protein': 0.26, 'fat': 0.17, 'carbs': 13.81, 'sugar': 10.39},
-      'roti': {'calories': 264.0, 'protein': 6.59, 'fat': 1.94, 'carbs': 55.05, 'sugar': 0.0},
-      'chicken': {'calories': 165.0, 'protein': 31.0, 'fat': 3.6, 'carbs': 0.0, 'sugar': 0.0},
-      'rice': {'calories': 130.0, 'protein': 2.7, 'fat': 0.3, 'carbs': 28.0, 'sugar': 0.1},
-      'default': {'calories': 50.0, 'protein': 2.0, 'fat': 1.0, 'carbs': 10.0, 'sugar': 0.5},
+      'apple': {
+        'calories': 52.0,
+        'protein': 0.26,
+        'fat': 0.17,
+        'carbs': 13.81,
+        'sugar': 10.39
+      },
+      'roti': {
+        'calories': 264.0,
+        'protein': 6.59,
+        'fat': 1.94,
+        'carbs': 55.05,
+        'sugar': 0.0
+      },
+      'chicken': {
+        'calories': 165.0,
+        'protein': 31.0,
+        'fat': 3.6,
+        'carbs': 0.0,
+        'sugar': 0.0
+      },
+      'rice': {
+        'calories': 130.0,
+        'protein': 2.7,
+        'fat': 0.3,
+        'carbs': 28.0,
+        'sugar': 0.1
+      },
+      'default': {
+        'calories': 50.0,
+        'protein': 2.0,
+        'fat': 1.0,
+        'carbs': 10.0,
+        'sugar': 0.5
+      },
     };
 
     try {
-    const appId = '05fec456';
-    const appKey = '9676de0299a58fcd5ba4335697e03639';
+      const appId = '05fec456';
+      const appKey = '9676de0299a58fcd5ba4335697e03639';
       final url = Uri.parse(
           'https://api.edamam.com/api/food-database/v2/parser?ingr=${Uri.encodeQueryComponent(foodName)}&app_id=$appId&app_key=$appKey');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final foodItem = data['parsed']?.isNotEmpty == true ? data['parsed'][0]['food'] : null;
+        final foodItem = data['parsed']?.isNotEmpty == true
+            ? data['parsed'][0]['food']
+            : null;
 
         if (foodItem == null) {
           throw Exception("No food data found for '$foodName'");
@@ -146,17 +179,33 @@ class _DietScreenState extends State<DietScreen> {
         final nutrients = foodItem['nutrients'] ?? {};
         final foodData = {
           'name': foodName,
-          'calories': (nutrients['ENERC_KCAL'] ?? fallbackData[foodName] ?? fallbackData['default']!['calories']!).toDouble(),
-          'protein': (nutrients['PROCNT'] ?? fallbackData[foodName] ?? fallbackData['default']!['protein']!).toDouble(),
-          'fat': (nutrients['FAT'] ?? fallbackData[foodName] ?? fallbackData['default']!['fat']!).toDouble(),
-          'carbs': (nutrients['CHOCDF'] ?? fallbackData[foodName] ?? fallbackData['default']!['carbs']!).toDouble(),
-          'sugar': (nutrients['SUGAR'] ?? fallbackData[foodName] ?? fallbackData['default']!['sugar']!).toDouble(),
+          'calories': (nutrients['ENERC_KCAL'] ??
+                  fallbackData[foodName] ??
+                  fallbackData['default']!['calories']!)
+              .toDouble(),
+          'protein': (nutrients['PROCNT'] ??
+                  fallbackData[foodName] ??
+                  fallbackData['default']!['protein']!)
+              .toDouble(),
+          'fat': (nutrients['FAT'] ??
+                  fallbackData[foodName] ??
+                  fallbackData['default']!['fat']!)
+              .toDouble(),
+          'carbs': (nutrients['CHOCDF'] ??
+                  fallbackData[foodName] ??
+                  fallbackData['default']!['carbs']!)
+              .toDouble(),
+          'sugar': (nutrients['SUGAR'] ??
+                  fallbackData[foodName] ??
+                  fallbackData['default']!['sugar']!)
+              .toDouble(),
           'quantity': 1.0,
           'timestamp': Timestamp.now(),
         };
 
         final today = DateTime.now();
-        final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+        final dateStr =
+            "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
         final docRef = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -185,17 +234,28 @@ class _DietScreenState extends State<DietScreen> {
 
       final foodData = {
         'name': foodName,
-        'calories': (fallbackData[foodName]?['calories'] ?? fallbackData['default']!['calories']!).toDouble(),
-        'protein': (fallbackData[foodName]?['protein'] ?? fallbackData['default']!['protein']!).toDouble(),
-        'fat': (fallbackData[foodName]?['fat'] ?? fallbackData['default']!['fat']!).toDouble(),
-        'carbs': (fallbackData[foodName]?['carbs'] ?? fallbackData['default']!['carbs']!).toDouble(),
-        'sugar': (fallbackData[foodName]?['sugar'] ?? fallbackData['default']!['sugar']!).toDouble(),
+        'calories': (fallbackData[foodName]?['calories'] ??
+                fallbackData['default']!['calories']!)
+            .toDouble(),
+        'protein': (fallbackData[foodName]?['protein'] ??
+                fallbackData['default']!['protein']!)
+            .toDouble(),
+        'fat':
+            (fallbackData[foodName]?['fat'] ?? fallbackData['default']!['fat']!)
+                .toDouble(),
+        'carbs': (fallbackData[foodName]?['carbs'] ??
+                fallbackData['default']!['carbs']!)
+            .toDouble(),
+        'sugar': (fallbackData[foodName]?['sugar'] ??
+                fallbackData['default']!['sugar']!)
+            .toDouble(),
         'quantity': 1.0,
         'timestamp': Timestamp.now(),
       };
 
       final today = DateTime.now();
-      final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+      final dateStr =
+          "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
       final docRef = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -211,17 +271,24 @@ class _DietScreenState extends State<DietScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("$foodName added with default values due to API error")),
+        SnackBar(
+            content:
+                Text("$foodName added with default values due to API error")),
       );
     }
   }
 
   void _calculateTotals() {
-    _caloriesConsumed = _foodLog.fold(0, (sum, item) => sum + (item['calories'] * (item['quantity'] ?? 1.0)));
-    _proteinConsumed = _foodLog.fold(0, (sum, item) => sum + (item['protein'] * (item['quantity'] ?? 1.0)));
-    _fatConsumed = _foodLog.fold(0, (sum, item) => sum + (item['fat'] * (item['quantity'] ?? 1.0)));
-    _carbsConsumed = _foodLog.fold(0, (sum, item) => sum + (item['carbs'] * (item['quantity'] ?? 1.0)));
-    _sugarConsumed = _foodLog.fold(0, (sum, item) => sum + (item['sugar'] * (item['quantity'] ?? 1.0)));
+    _caloriesConsumed = _foodLog.fold(
+        0, (sum, item) => sum + (item['calories'] * (item['quantity'] ?? 1.0)));
+    _proteinConsumed = _foodLog.fold(
+        0, (sum, item) => sum + (item['protein'] * (item['quantity'] ?? 1.0)));
+    _fatConsumed = _foodLog.fold(
+        0, (sum, item) => sum + (item['fat'] * (item['quantity'] ?? 1.0)));
+    _carbsConsumed = _foodLog.fold(
+        0, (sum, item) => sum + (item['carbs'] * (item['quantity'] ?? 1.0)));
+    _sugarConsumed = _foodLog.fold(
+        0, (sum, item) => sum + (item['sugar'] * (item['quantity'] ?? 1.0)));
   }
 
   Future<void> _removeFood(String? id) async {
@@ -236,7 +303,8 @@ class _DietScreenState extends State<DietScreen> {
     if (user == null) return;
 
     final today = DateTime.now();
-    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    final dateStr =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -275,7 +343,8 @@ class _DietScreenState extends State<DietScreen> {
     if (user == null) return;
 
     final today = DateTime.now();
-    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    final dateStr =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
     try {
       final index = _foodLog.indexWhere((item) => item['id'] == id);
       if (index != -1) {
@@ -358,6 +427,27 @@ class _DietScreenState extends State<DietScreen> {
       warnings.add("Warning: You've exceeded your daily fat limit!");
     }
     return warnings;
+  }
+
+  TableRow _buildTableRow(String label, String value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 16, color: Colors.blueGrey),
+          ),
+        ),
+      ],
+    );
   }
 
   void _onItemTapped(int index) {
@@ -448,7 +538,8 @@ class _DietScreenState extends State<DietScreen> {
                             ),
                             child: const Text(
                               "Add Food",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -518,88 +609,188 @@ class _DietScreenState extends State<DietScreen> {
                                     color: Colors.grey,
                                   ),
                                 )
-                              : Column(
-                                  children: _foodLog.map((food) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 8.0),
-                                        child: Card(
-                                          elevation: 3,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(16.0),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        food['name'] as String? ?? 'Unknown',
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Color(0xFF1E3C72),
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        "Calories: ${(food['calories'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1)} kcal, Protein: ${(food['protein'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1)}g, Fat: ${(food['fat'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1)}g, Carbs: ${(food['carbs'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1)}g, Sugar: ${(food['sugar'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1)}g",
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.blueGrey[700],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    IconButton(
-                                                      onPressed: () => _updateQuantity(food['id'] as String?, (food['quantity'] as double? ?? 1.0) - 1),
-                                                      icon: const Icon(Icons.remove),
-                                                      color: const Color(0xFF56C596),
-                                                    ),
-                                                    Text(
-                                                      '${(food['quantity'] as double? ?? 1.0).toStringAsFixed(0)}',
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Color(0xFF1E3C72),
-                                                      ),
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () => _updateQuantity(food['id'] as String?, (food['quantity'] as double? ?? 1.0) + 1),
-                                                      icon: const Icon(Icons.add),
-                                                      color: const Color(0xFF56C596),
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () => _removeFood(food['id'] as String?),
-                                                      icon: const Icon(Icons.delete),
-                                                      color: Colors.red,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
+                              : SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: DataTable(
+                                    columns: const [
+                                      DataColumn(
+                                          label: Text('Food',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Calories',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Protein (g)',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Fat (g)',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Carbs (g)',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Sugar (g)',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Quantity',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                      DataColumn(
+                                          label: Text('Actions',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold))),
+                                    ],
+                                    rows: _foodLog.map((food) {
+                                      return DataRow(cells: [
+                                        DataCell(Text(food['name'] as String? ??
+                                            'Unknown')),
+                                        DataCell(Text((food['calories'] *
+                                                (food['quantity'] ?? 1.0))
+                                            .toStringAsFixed(1))),
+                                        DataCell(Text((food['protein'] *
+                                                (food['quantity'] ?? 1.0))
+                                            .toStringAsFixed(1))),
+                                        DataCell(Text((food['fat'] *
+                                                (food['quantity'] ?? 1.0))
+                                            .toStringAsFixed(1))),
+                                        DataCell(Text((food['carbs'] *
+                                                (food['quantity'] ?? 1.0))
+                                            .toStringAsFixed(1))),
+                                        DataCell(Text((food['sugar'] *
+                                                (food['quantity'] ?? 1.0))
+                                            .toStringAsFixed(1))),
+                                        DataCell(Text(
+                                            (food['quantity'] as double? ?? 1.0)
+                                                .toStringAsFixed(0))),
+                                        DataCell(
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () => _updateQuantity(
+                                                    food['id'] as String?,
+                                                    (food['quantity']
+                                                                as double? ??
+                                                            1.0) -
+                                                        1),
+                                                icon: const Icon(Icons.remove),
+                                                color: const Color(0xFF56C596),
+                                              ),
+                                              IconButton(
+                                                onPressed: () => _updateQuantity(
+                                                    food['id'] as String?,
+                                                    (food['quantity']
+                                                                as double? ??
+                                                            1.0) +
+                                                        1),
+                                                icon: const Icon(Icons.add),
+                                                color: const Color(0xFF56C596),
+                                              ),
+                                              IconButton(
+                                                onPressed: () => _removeFood(
+                                                    food['id'] as String?),
+                                                icon: const Icon(Icons.delete),
+                                                color: Colors.red,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      )).toList(),
+                                      ]);
+                                    }).toList(),
+                                  ),
                                 ),
                           const SizedBox(height: 16),
-                          Text(
-                            "Total: ${_caloriesConsumed.toStringAsFixed(1)} kcal, ${_proteinConsumed.toStringAsFixed(1)}g protein, ${_fatConsumed.toStringAsFixed(1)}g fat, ${_carbsConsumed.toStringAsFixed(1)}g carbs, ${_sugarConsumed.toStringAsFixed(1)}g sugar",
+                          Table(
+                            border:
+                                TableBorder.all(color: Colors.grey, width: 0.5),
+                            columnWidths: const {
+                              0: FlexColumnWidth(2),
+                              1: FlexColumnWidth(3),
+                            },
+                            children: [
+                              _buildTableRow("Calories",
+                                  "${_caloriesConsumed.toStringAsFixed(1)} kcal"),
+                              _buildTableRow("Protein",
+                                  "${_proteinConsumed.toStringAsFixed(1)} g"),
+                              _buildTableRow("Fat",
+                                  "${_fatConsumed.toStringAsFixed(1)} g"),
+                              _buildTableRow("Carbs",
+                                  "${_carbsConsumed.toStringAsFixed(1)} g"),
+                              _buildTableRow("Sugar",
+                                  "${_sugarConsumed.toStringAsFixed(1)} g"),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Remaining Nutrients",
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey[700],
+                              color: Color(0xFF1E3C72),
                             ),
                           ),
-                          Text(
-                            "Remaining: ${(dietPlan['calories'] - _caloriesConsumed).toStringAsFixed(1)} kcal, ${(dietPlan['protein'] - _proteinConsumed).toStringAsFixed(1)}g protein, ${(dietPlan['fat'] - _fatConsumed).toStringAsFixed(1)}g fat, ${(dietPlan['carbs'] - _carbsConsumed).toStringAsFixed(1)}g carbs, ${(dietPlan['sugar'] - _sugarConsumed).toStringAsFixed(1)}g sugar",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.blueGrey[700],
-                            ),
+                          const SizedBox(height: 16),
+                          Table(
+                            border:
+                                TableBorder.all(color: Colors.grey, width: 0.5),
+                            columnWidths: const {
+                              0: FlexColumnWidth(2),
+                              1: FlexColumnWidth(3),
+                            },
+                            children: [
+                              _buildTableRow(
+                                  "Calories",
+                                  (dietPlan['calories'] - _caloriesConsumed)
+                                          .toStringAsFixed(1) +
+                                      " kcal"),
+                              _buildTableRow(
+                                  "Protein",
+                                  (dietPlan['protein'] - _proteinConsumed)
+                                          .toStringAsFixed(1) +
+                                      " g"),
+                              _buildTableRow(
+                                  "Fat",
+                                  (dietPlan['fat'] - _fatConsumed)
+                                          .toStringAsFixed(1) +
+                                      " g"),
+                              _buildTableRow(
+                                  "Carbs",
+                                  (dietPlan['carbs'] - _carbsConsumed)
+                                          .toStringAsFixed(1) +
+                                      " g"),
+                              _buildTableRow(
+                                  "Sugar",
+                                  (dietPlan['sugar'] - _sugarConsumed)
+                                          .toStringAsFixed(1) +
+                                      " g"),
+                            ],
                           ),
                         ],
                       ),
@@ -633,35 +824,37 @@ class _DietScreenState extends State<DietScreen> {
                               });
                             },
                             items: const [
-                              DropdownMenuItem(value: 'maintain', child: Text("Maintain Weight")),
-                              DropdownMenuItem(value: 'lose', child: Text("Lose Weight")),
-                              DropdownMenuItem(value: 'gain', child: Text("Gain Weight")),
+                              DropdownMenuItem(
+                                  value: 'maintain',
+                                  child: Text("Maintain Weight")),
+                              DropdownMenuItem(
+                                  value: 'lose', child: Text("Lose Weight")),
+                              DropdownMenuItem(
+                                  value: 'gain', child: Text("Gain Weight")),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            "BMI: ${dietPlan['bmi'].toStringAsFixed(1)}",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
-                          ),
-                          Text(
-                            "Target Calories: ${dietPlan['calories'].toStringAsFixed(1)} kcal",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
-                          ),
-                          Text(
-                            "Protein: ${dietPlan['protein'].toStringAsFixed(1)} g",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
-                          ),
-                          Text(
-                            "Fat: ${dietPlan['fat'].toStringAsFixed(1)} g",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
-                          ),
-                          Text(
-                            "Carbs: ${dietPlan['carbs'].toStringAsFixed(1)} g",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
-                          ),
-                          Text(
-                            "Sugar: ${dietPlan['sugar'].toStringAsFixed(1)} g",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
+                          Table(
+                            border:
+                                TableBorder.all(color: Colors.grey, width: 0.5),
+                            columnWidths: const {
+                              0: FlexColumnWidth(2),
+                              1: FlexColumnWidth(3),
+                            },
+                            children: [
+                              _buildTableRow(
+                                  "BMI", dietPlan['bmi'].toStringAsFixed(1)),
+                              _buildTableRow("Target Calories",
+                                  "${dietPlan['calories'].toStringAsFixed(1)} kcal"),
+                              _buildTableRow("Protein",
+                                  "${dietPlan['protein'].toStringAsFixed(1)} g"),
+                              _buildTableRow("Fat",
+                                  "${dietPlan['fat'].toStringAsFixed(1)} g"),
+                              _buildTableRow("Carbs",
+                                  "${dietPlan['carbs'].toStringAsFixed(1)} g"),
+                              _buildTableRow("Sugar",
+                                  "${dietPlan['sugar'].toStringAsFixed(1)} g"),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           const Text(
@@ -678,7 +871,8 @@ class _DietScreenState extends State<DietScreen> {
                                 : _goal == 'gain'
                                     ? "- Oatmeal (50g): 190 kcal, 6g protein, 3g fat, 32g carbs\n- Peanut butter (30g): 180 kcal, 7g protein, 16g fat, 6g carbs\n- Banana (120g): 90 kcal, 1g protein, 0g fat, 23g carbs"
                                     : "- Whole wheat roti (50g): 150 kcal, 4g protein, 2g fat, 28g carbs\n- Lentil dal (100g): 120 kcal, 7g protein, 2g fat, 17g carbs\n- Mixed vegetables (100g): 50 kcal, 2g protein, 0g fat, 10g carbs",
-                            style: TextStyle(fontSize: 16, color: Colors.blueGrey[700]),
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.blueGrey[700]),
                           ),
                         ],
                       ),

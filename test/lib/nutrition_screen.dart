@@ -33,7 +33,7 @@ class _NutrientScreenState extends State<NutrientScreen> {
   List<String> otherIngredients = [];
   int totalIngredients = 0;
   bool isAddedToCart = false;
-  int _selectedIndex = 0; // Not a primary tab
+  int _selectedIndex = 0;
 
   final List<String> predefinedBadIngredients = [
     'high fructose corn syrup',
@@ -281,8 +281,8 @@ class _NutrientScreenState extends State<NutrientScreen> {
             child: Row(
               children: [
                 Text("$emoji ", style: const TextStyle(fontSize: 18)),
-                Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3C72))),
-                Text("$value $unit", style: const TextStyle(color: Color(0xFF1E3C72))),
+                Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                Text("$value $unit", style: const TextStyle(color: Colors.green)),
               ],
             ),
           )
@@ -322,27 +322,112 @@ class _NutrientScreenState extends State<NutrientScreen> {
     if (index == 0) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ScannerScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const ScannerScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     } else if (index == 1) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const SearchScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const SearchScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     } else if (index == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ShopListScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const ShopListScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const DietScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
-    }else if (index == 3) {
+    } else if (index == 4) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const DietScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const ProfileScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     }
   }
@@ -350,25 +435,27 @@ class _NutrientScreenState extends State<NutrientScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Product Details"),
-        backgroundColor: const Color(0xFF1E3C72),
-        elevation: 0,
-        foregroundColor: Colors.white,
+        title: const Text("Product Details", style: TextStyle(color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        foregroundColor: Colors.black,
+        shadowColor: Colors.grey[200],
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.grey))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -395,7 +482,7 @@ class _NutrientScreenState extends State<NutrientScreen> {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3C72),
+                              color: Colors.green,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -405,7 +492,7 @@ class _NutrientScreenState extends State<NutrientScreen> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: personalizedRating != null ? const Color(0xFF56C596) : Colors.grey,
+                              color: personalizedRating != null ? Colors.green : Colors.grey,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -413,7 +500,7 @@ class _NutrientScreenState extends State<NutrientScreen> {
                           ElevatedButton(
                             onPressed: isAddedToCart ? null : addToCart,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isAddedToCart ? Colors.grey : const Color(0xFF56C596),
+                              backgroundColor: isAddedToCart ? Colors.grey : Colors.green,
                               foregroundColor: Colors.white,
                               minimumSize: const Size(double.infinity, 50),
                               shape: RoundedRectangleBorder(
@@ -435,15 +522,16 @@ class _NutrientScreenState extends State<NutrientScreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3C72),
+                      color: Colors.green,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: nutriments.isEmpty
@@ -486,15 +574,16 @@ class _NutrientScreenState extends State<NutrientScreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3C72),
+                      color: Colors.green,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: ingredients == "No ingredients found. Stay curious!"
@@ -524,7 +613,7 @@ class _NutrientScreenState extends State<NutrientScreen> {
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1E3C72),
+                                    color: Colors.green,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -547,12 +636,15 @@ class _NutrientScreenState extends State<NutrientScreen> {
                 ],
               ),
             ),
-bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1E3C72),
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: const Color(0xFF000000),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
@@ -567,12 +659,12 @@ bottomNavigationBar: BottomNavigationBar(
             label: 'Cart',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.food_bank_outlined),
+            label: 'Diet Log',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
-          ),
-           BottomNavigationBarItem(
-            icon: Icon(Icons.food_bank_outlined),
-            label: 'Diet',
           ),
         ],
       ),

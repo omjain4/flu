@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
-import 'nutrition_screen.dart';
 import 'scanner_screen.dart';
-import 'shop_list_screen.dart';
+import 'nutrition_screen.dart';
 import 'profile_screen.dart';
-import 'cart_provider.dart';
+import 'shop_list_screen.dart';
 import 'diet_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -19,51 +17,44 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
-  bool _isSearching = false;
+  bool _isLoading = false;
   int _selectedIndex = 1;
 
-  Future<void> _searchProducts(String query) async {
+  Future<void> _searchProduct(String query) async {
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
-        _isSearching = false;
       });
       return;
     }
 
     setState(() {
-      _isSearching = true;
+      _isLoading = true;
     });
 
     try {
       final response = await http.get(Uri.parse(
-          'https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&json=1&fields=code,product_name,image_front_small_url'));
+          'https://world.openfoodfacts.org/cgi/search.pl?search_terms=$query&search_simple=1&json=1'));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final products = data['products'] as List<dynamic>? ?? [];
+        final data = jsonDecode(response.body);
+        final products = data['products'] as List<dynamic>;
         setState(() {
           _searchResults = products.map((product) {
             return {
-              'code': product['code'] ?? '',
-              'name': product['product_name'] ?? 'Unknown',
-              'image': product['image_front_small_url'] ?? 'https://via.placeholder.com/150?text=No+Image',
+              'name': product['product_name'] ?? 'Unknown Product',
+              'barcode': product['code'] ?? 'N/A',
+              'image': product['image_front_small_url'] ??
+                  'https://via.placeholder.com/150?text=No+Image',
             };
           }).toList();
-          _isSearching = false;
+          _isLoading = false;
         });
       } else {
-        setState(() {
-          _searchResults = [];
-          _isSearching = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to fetch search results")),
-        );
+        throw Exception('Failed to load search results');
       }
     } catch (e) {
       setState(() {
-        _searchResults = [];
-        _isSearching = false;
+        _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
@@ -88,15 +79,12 @@ class _SearchScreenState extends State<SearchScreen> {
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        MaterialPageRoute(builder: (context) => const DietScreen()),
       );
-    }
-    else if (index == 4) {
+    } else if (index == 4) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const DietScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
     }
   }
@@ -104,165 +92,123 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Search Products"),
-        backgroundColor: const Color(0xFF1E3C72),
-        elevation: 0,
-        foregroundColor: Colors.white,
+        title: const Text("Search", style: TextStyle(color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        foregroundColor: Colors.black,
+        shadowColor: Colors.grey[200],
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        labelText: "Search for Products",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        prefixIcon: const Icon(Icons.search),
-                      ),
-                      onChanged: (value) {
-                        _searchProducts(value.trim());
-                      },
-                    ),
-                  ],
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: "Search for a product",
+                labelStyle: const TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey[300]!),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search, color: Colors.grey),
+                  onPressed: () {
+                    _searchProduct(_searchController.text);
+                  },
                 ),
               ),
+              onSubmitted: (value) {
+                _searchProduct(value);
+              },
             ),
             const SizedBox(height: 16),
-            const Text(
-              "Search Results",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3C72),
-              ),
-            ),
-            const SizedBox(height: 8),
-            _isSearching
-                ? const Center(child: CircularProgressIndicator())
-                : _searchResults.isEmpty
-                    ? Center(
-                        child: Text(
-                          "No products found",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blueGrey[700],
-                          ),
-                        ),
-                      )
-                    : GridView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.7,
-                        ),
-                        itemCount: _searchResults.length,
-                        itemBuilder: (context, index) {
-                          final item = _searchResults[index];
-                          final isInCart = Provider.of<CartProvider>(context, listen: false).isItemInCart(item['code']);
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NutrientScreen(barcode: item['code']),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.grey))
+                : Expanded(
+                    child: _searchResults.isEmpty
+                        ? const Center(
+                            child: Text(
+                              "No results found",
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _searchResults.length,
+                            itemBuilder: (context, index) {
+                              final product = _searchResults[index];
+                              return Card(
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              );
-                            },
-                            child: Card(
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.network(
-                                    item['image'],
-                                    height: 60,
+                                color: Colors.white,
+                                child: ListTile(
+                                  leading: Image.network(
+                                    product['image'],
+                                    width: 50,
+                                    height: 50,
                                     fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) {
                                       return const Icon(
                                         Icons.broken_image,
-                                        size: 60,
+                                        size: 50,
                                         color: Colors.grey,
                                       );
                                     },
                                   ),
-                                  const SizedBox(height: 8),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                    child: Text(
-                                      item['name'],
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color(0xFF1E3C72),
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                                  title: Text(
+                                    product['name'],
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  ElevatedButton(
-                                    onPressed: isInCart
-                                        ? null
-                                        : () {
-                                            Provider.of<CartProvider>(context, listen: false).addToCart({
-                                              'name': item['name'],
-                                              'code': item['code'],
-                                              'quantity': 1,
-                                            });
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text("${item['name']} added to cart!")),
-                                            );
-                                          },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isInCart ? Colors.grey : const Color(0xFF56C596),
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      minimumSize: const Size(100, 30),
-                                    ),
-                                    child: Text(
-                                      isInCart ? 'Already Added to Cart' : 'Add to Cart',
-                                      style: const TextStyle(fontSize: 12),
+                                  subtitle: Text(
+                                    'Barcode: ${product['barcode']}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => NutrientScreen(
+                                          barcode: product['barcode'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                  ),
           ],
         ),
       ),
- bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1E3C72),
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: const Color(0xFF000000),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
@@ -277,12 +223,12 @@ class _SearchScreenState extends State<SearchScreen> {
             label: 'Cart',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.food_bank_outlined),
             label: 'Diet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
           ),
         ],
       ),

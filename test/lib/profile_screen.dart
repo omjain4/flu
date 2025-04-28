@@ -5,7 +5,7 @@ import 'scanner_screen.dart';
 import 'search_screen.dart';
 import 'diet_screen.dart';
 import 'shop_list_screen.dart';
-import 'login_screen.dart'; // Added to enable navigation to LoginScreen
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,7 +15,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedIndex = 3;
+  int _selectedIndex = 4;
   final _weightController = TextEditingController();
   final _heightController = TextEditingController();
   final _sugarLimitController = TextEditingController();
@@ -173,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await FirebaseAuth.instance.signOut();
       Navigator.pushReplacementNamed(
         context,
-        '/login', // Redirect to LoginScreen using named route
+        '/login',
       );
     } catch (e) {
       print("Error logging out: $e");
@@ -190,27 +190,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (index == 0) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ScannerScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const ScannerScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     } else if (index == 1) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const SearchScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const SearchScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     } else if (index == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ShopListScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const ShopListScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-      );
-    } else if (index == 4) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DietScreen()),
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const DietScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: Curves.easeInOutSine),
+            );
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
       );
     }
   }
@@ -219,27 +282,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Profile"),
-        backgroundColor: const Color(0xFF1E3C72),
-        elevation: 0,
-        foregroundColor: Colors.white,
+        title: const Text("Profile", style: TextStyle(color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        foregroundColor: Colors.black,
+        shadowColor: Colors.grey[200],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.grey))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.white,
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -251,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1E3C72),
+                                  color: Colors.black87,
                                 ),
                               ),
                               IconButton(
@@ -262,9 +327,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                                 icon: Icon(
                                   Icons.edit,
-                                  color: _isEditingUserInfo
-                                      ? const Color(0xFF56C596)
-                                      : Colors.grey,
+                                  color: _isEditingUserInfo ? Colors.green : Colors.grey,
+                                  size: 20,
                                 ),
                               ),
                             ],
@@ -272,9 +336,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 16),
                           Text(
                             "Email: ${user?.email ?? 'Not signed in'}",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 16,
-                              color: Colors.blueGrey[700],
+                              color: Colors.grey,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -283,17 +347,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   controller: _weightController,
                                   decoration: InputDecoration(
                                     labelText: "Weight (kg)",
+                                    labelStyle: const TextStyle(color: Colors.grey),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
                                   ),
                                   keyboardType: TextInputType.number,
                                 )
                               : Text(
                                   "Weight: ${_userData?['weight']?.toString() ?? 'Not set'} kg",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.blueGrey[700],
+                                    color: Colors.grey,
                                   ),
                                 ),
                           const SizedBox(height: 8),
@@ -302,17 +376,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   controller: _heightController,
                                   decoration: InputDecoration(
                                     labelText: "Height (cm)",
+                                    labelStyle: const TextStyle(color: Colors.grey),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
                                   ),
                                   keyboardType: TextInputType.number,
                                 )
                               : Text(
                                   "Height: ${_userData?['height']?.toString() ?? 'Not set'} cm",
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.blueGrey[700],
+                                    color: Colors.grey,
                                   ),
                                 ),
                           if (_isEditingUserInfo) ...[
@@ -320,7 +404,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ElevatedButton(
                               onPressed: _saveUserInfo,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF56C596),
+                                backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
                                 minimumSize: const Size(double.infinity, 50),
                                 shape: RoundedRectangleBorder(
@@ -329,8 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               child: const Text(
                                 "Save User Info",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -340,12 +423,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
                   Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.white,
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -357,21 +441,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1E3C72),
+                                  color: Colors.black87,
                                 ),
                               ),
                               IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    _isEditingPreferences =
-                                        !_isEditingPreferences;
+                                    _isEditingPreferences = !_isEditingPreferences;
                                   });
                                 },
                                 icon: Icon(
                                   Icons.edit,
-                                  color: _isEditingPreferences
-                                      ? const Color(0xFF56C596)
-                                      : Colors.grey,
+                                  color: _isEditingPreferences ? Colors.green : Colors.grey,
+                                  size: 20,
                                 ),
                               ),
                             ],
@@ -381,18 +463,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? TextField(
                                   controller: _sugarLimitController,
                                   decoration: InputDecoration(
-                                    labelText: "Max Sugar (g/100g)",
+                                    labelText: "Max Sugar (g)",
+                                    labelStyle: const TextStyle(color: Colors.grey),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
                                   ),
                                   keyboardType: TextInputType.number,
                                 )
                               : Text(
-                                  "Max Sugar: ${_preferences?['nutrient_limits']?['sugar']?['max']?.toString() ?? 'Not set'} g/100g",
-                                  style: TextStyle(
+                                  "Max Sugar: ${_preferences?['nutrient_limits']?['sugar']?['max']?.toString() ?? 'Not set'} g",
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.blueGrey[700],
+                                    color: Colors.grey,
                                   ),
                                 ),
                           const SizedBox(height: 8),
@@ -400,18 +492,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? TextField(
                                   controller: _fiberLimitController,
                                   decoration: InputDecoration(
-                                    labelText: "Min Fiber (g/100g)",
+                                    labelText: "Min Fiber (g)",
+                                    labelStyle: const TextStyle(color: Colors.grey),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
                                   ),
                                   keyboardType: TextInputType.number,
                                 )
                               : Text(
-                                  "Min Fiber: ${_preferences?['nutrient_limits']?['fiber']?['min']?.toString() ?? 'Not set'} g/100g",
-                                  style: TextStyle(
+                                  "Min Fiber: ${_preferences?['nutrient_limits']?['fiber']?['min']?.toString() ?? 'Not set'} g",
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.blueGrey[700],
+                                    color: Colors.grey,
                                   ),
                                 ),
                           const SizedBox(height: 8),
@@ -419,18 +521,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? TextField(
                                   controller: _avoidIngredientsController,
                                   decoration: InputDecoration(
-                                    labelText:
-                                        "Ingredients to Avoid (comma-separated)",
+                                    labelText: "Avoid Ingredients (comma separated)",
+                                    labelStyle: const TextStyle(color: Colors.grey),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
                                   ),
                                 )
                               : Text(
-                                  "Ingredients to Avoid: ${_preferences?['ingredients_avoid']?.join(', ') ?? 'None'}",
-                                  style: TextStyle(
+                                  "Avoid Ingredients: ${_preferences?['ingredients_avoid']?.join(', ') ?? 'Not set'}",
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.blueGrey[700],
+                                    color: Colors.grey,
                                   ),
                                 ),
                           const SizedBox(height: 8),
@@ -438,18 +549,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ? TextField(
                                   controller: _preferIngredientsController,
                                   decoration: InputDecoration(
-                                    labelText:
-                                        "Preferred Ingredients (comma-separated)",
+                                    labelText: "Prefer Ingredients (comma separated)",
+                                    labelStyle: const TextStyle(color: Colors.grey),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.grey),
                                     ),
                                   ),
                                 )
                               : Text(
-                                  "Preferred Ingredients: ${_preferences?['ingredients_prefer']?.join(', ') ?? 'None'}",
-                                  style: TextStyle(
+                                  "Prefer Ingredients: ${_preferences?['ingredients_prefer']?.join(', ') ?? 'Not set'}",
+                                  style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.blueGrey[700],
+                                    color: Colors.grey,
                                   ),
                                 ),
                           if (_isEditingPreferences) ...[
@@ -457,7 +577,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ElevatedButton(
                               onPressed: _savePreferences,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF56C596),
+                                backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
                                 minimumSize: const Size(double.infinity, 50),
                                 shape: RoundedRectangleBorder(
@@ -466,8 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               child: const Text(
                                 "Save Preferences",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -477,27 +596,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 16),
                   Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    color: Colors.white,
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: ElevatedButton(
-                        onPressed: _logout,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Actions",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          "Logout",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _logout,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "Logout",
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -505,11 +638,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1E3C72),
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: const Color(0xFF000000),
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
@@ -524,12 +660,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             label: 'Cart',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
+            icon: Icon(Icons.food_bank_outlined),
+            label: 'Diet Log',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.food_bank_outlined),
-            label: 'Diet',
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
           ),
         ],
       ),

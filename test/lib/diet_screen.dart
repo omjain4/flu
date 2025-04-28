@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'scanner_screen.dart';
 import 'search_screen.dart';
 import 'shop_list_screen.dart';
@@ -240,9 +241,9 @@ class _DietScreenState extends State<DietScreen> {
         'protein': (fallbackData[foodName]?['protein'] ??
                 fallbackData['default']!['protein']!)
             .toDouble(),
-        'fat':
-            (fallbackData[foodName]?['fat'] ?? fallbackData['default']!['fat']!)
-                .toDouble(),
+        'fat': (fallbackData[foodName]?['fat'] ??
+                fallbackData['default']!['fat']!)
+            .toDouble(),
         'carbs': (fallbackData[foodName]?['carbs'] ??
                 fallbackData['default']!['carbs']!)
             .toDouble(),
@@ -378,7 +379,7 @@ class _DietScreenState extends State<DietScreen> {
     }
   }
 
-  Map<String, dynamic> _calculateDietPlan() {
+  Map<String, dynamic> _calculateDietPlan({String goal = 'maintain'}) {
     final weight = _userData?['weight']?.toDouble() ?? 70.0;
     final height = _userData?['height']?.toDouble() ?? 170.0;
     final age = _userData?['age']?.toDouble() ?? 30.0;
@@ -392,9 +393,9 @@ class _DietScreenState extends State<DietScreen> {
     final tdee = bmr * activityLevel;
 
     double targetCalories;
-    if (_goal == 'lose') {
+    if (goal == 'lose') {
       targetCalories = tdee - 500;
-    } else if (_goal == 'gain') {
+    } else if (goal == 'gain') {
       targetCalories = tdee + 500;
     } else {
       targetCalories = tdee;
@@ -430,25 +431,25 @@ class _DietScreenState extends State<DietScreen> {
   }
 
   TableRow _buildTableRow(String label, String value) {
-    return TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      return TableRow(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 16, color: Colors.blueGrey),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
+    }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -472,6 +473,11 @@ class _DietScreenState extends State<DietScreen> {
     } else if (index == 3) {
       Navigator.pushReplacement(
         context,
+        MaterialPageRoute(builder: (context) => const DietScreen()),
+      );
+    } else if (index == 4) {
+      Navigator.pushReplacement(
+        context,
         MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
     }
@@ -479,341 +485,99 @@ class _DietScreenState extends State<DietScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dietPlan = _calculateDietPlan();
+    final dietPlan = _calculateDietPlan(goal: _goal);
     final warnings = _checkNutrientWarnings(dietPlan);
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text("Diet Tracker"),
-        backgroundColor: const Color(0xFF1E3C72),
+        title: const Text("Diet Log", style: TextStyle(color: Colors.black87)),
+        backgroundColor: Colors.white,
         elevation: 0,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.black,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.grey))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Add Food",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3C72),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: _foodController,
-                            decoration: InputDecoration(
-                              labelText: "Food Name (e.g., roti)",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: _addFood,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF56C596),
-                              foregroundColor: Colors.white,
-                              minimumSize: const Size(double.infinity, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              "Add Food",
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (warnings.isNotEmpty)
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Warnings",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E3C72),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            ...warnings.map((warning) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Text(
-                                    warning,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                )),
-                          ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat('MMM d, yyyy').format(DateTime.now()),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                         ),
-                      ),
+                      ],
                     ),
-                  const SizedBox(height: 16),
+                  ),
                   Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Today's Food Log",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3C72),
-                            ),
+                          const Row(
+                            children: [
+                              Icon(Icons.show_chart, color: Colors.green),
+                              SizedBox(width: 8),
+                              Text(
+                                "Daily Summary",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
-                          _foodLog.isEmpty
-                              ? const Text(
-                                  "No foods logged today",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                  ),
-                                )
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: DataTable(
-                                    columns: const [
-                                      DataColumn(
-                                          label: Text('Food',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Calories',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Protein (g)',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Fat (g)',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Carbs (g)',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Sugar (g)',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Quantity',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                      DataColumn(
-                                          label: Text('Actions',
-                                              style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold))),
-                                    ],
-                                    rows: _foodLog.map((food) {
-                                      return DataRow(cells: [
-                                        DataCell(Text(food['name'] as String? ??
-                                            'Unknown')),
-                                        DataCell(Text((food['calories'] *
-                                                (food['quantity'] ?? 1.0))
-                                            .toStringAsFixed(1))),
-                                        DataCell(Text((food['protein'] *
-                                                (food['quantity'] ?? 1.0))
-                                            .toStringAsFixed(1))),
-                                        DataCell(Text((food['fat'] *
-                                                (food['quantity'] ?? 1.0))
-                                            .toStringAsFixed(1))),
-                                        DataCell(Text((food['carbs'] *
-                                                (food['quantity'] ?? 1.0))
-                                            .toStringAsFixed(1))),
-                                        DataCell(Text((food['sugar'] *
-                                                (food['quantity'] ?? 1.0))
-                                            .toStringAsFixed(1))),
-                                        DataCell(Text(
-                                            (food['quantity'] as double? ?? 1.0)
-                                                .toStringAsFixed(0))),
-                                        DataCell(
-                                          Row(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () => _updateQuantity(
-                                                    food['id'] as String?,
-                                                    (food['quantity']
-                                                                as double? ??
-                                                            1.0) -
-                                                        1),
-                                                icon: const Icon(Icons.remove),
-                                                color: const Color(0xFF56C596),
-                                              ),
-                                              IconButton(
-                                                onPressed: () => _updateQuantity(
-                                                    food['id'] as String?,
-                                                    (food['quantity']
-                                                                as double? ??
-                                                            1.0) +
-                                                        1),
-                                                icon: const Icon(Icons.add),
-                                                color: const Color(0xFF56C596),
-                                              ),
-                                              IconButton(
-                                                onPressed: () => _removeFood(
-                                                    food['id'] as String?),
-                                                icon: const Icon(Icons.delete),
-                                                color: Colors.red,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ]);
-                                    }).toList(),
-                                  ),
-                                ),
-                          const SizedBox(height: 16),
-                          Table(
-                            border:
-                                TableBorder.all(color: Colors.grey, width: 0.5),
-                            columnWidths: const {
-                              0: FlexColumnWidth(2),
-                              1: FlexColumnWidth(3),
-                            },
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _buildTableRow("Calories",
-                                  "${_caloriesConsumed.toStringAsFixed(1)} kcal"),
-                              _buildTableRow("Protein",
-                                  "${_proteinConsumed.toStringAsFixed(1)} g"),
-                              _buildTableRow("Fat",
-                                  "${_fatConsumed.toStringAsFixed(1)} g"),
-                              _buildTableRow("Carbs",
-                                  "${_carbsConsumed.toStringAsFixed(1)} g"),
-                              _buildTableRow("Sugar",
-                                  "${_sugarConsumed.toStringAsFixed(1)} g"),
+                              _buildProgressBar("Calories", _caloriesConsumed, dietPlan['calories'], ""),
+                              _buildProgressBar("Protein", _proteinConsumed, dietPlan['protein'], "g"),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildProgressBar("Carbs", _carbsConsumed, dietPlan['carbs'], "g"),
+                              _buildProgressBar("Fat", _fatConsumed, dietPlan['fat'], "g"),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildProgressBar("Sugar", _sugarConsumed, dietPlan['sugar'], "g"),
+                              SizedBox(width: MediaQuery.of(context).size.width * 0.4 - 16), // Placeholder
                             ],
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
                   Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Remaining Nutrients",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3C72),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Table(
-                            border:
-                                TableBorder.all(color: Colors.grey, width: 0.5),
-                            columnWidths: const {
-                              0: FlexColumnWidth(2),
-                              1: FlexColumnWidth(3),
-                            },
+                          const Row(
                             children: [
-                              _buildTableRow(
-                                  "Calories",
-                                  (dietPlan['calories'] - _caloriesConsumed)
-                                          .toStringAsFixed(1) +
-                                      " kcal"),
-                              _buildTableRow(
-                                  "Protein",
-                                  (dietPlan['protein'] - _proteinConsumed)
-                                          .toStringAsFixed(1) +
-                                      " g"),
-                              _buildTableRow(
-                                  "Fat",
-                                  (dietPlan['fat'] - _fatConsumed)
-                                          .toStringAsFixed(1) +
-                                      " g"),
-                              _buildTableRow(
-                                  "Carbs",
-                                  (dietPlan['carbs'] - _carbsConsumed)
-                                          .toStringAsFixed(1) +
-                                      " g"),
-                              _buildTableRow(
-                                  "Sugar",
-                                  (dietPlan['sugar'] - _sugarConsumed)
-                                          .toStringAsFixed(1) +
-                                      " g"),
+                              Icon(Icons.fitness_center, color: Colors.green),
+                              SizedBox(width: 8),
+                              Text(
+                                "Weight Goal",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                              ),
                             ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Personalized Diet Plan",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3C72),
-                            ),
                           ),
                           const SizedBox(height: 16),
                           DropdownButton<String>(
@@ -824,56 +588,124 @@ class _DietScreenState extends State<DietScreen> {
                               });
                             },
                             items: const [
-                              DropdownMenuItem(
-                                  value: 'maintain',
-                                  child: Text("Maintain Weight")),
-                              DropdownMenuItem(
-                                  value: 'lose', child: Text("Lose Weight")),
-                              DropdownMenuItem(
-                                  value: 'gain', child: Text("Gain Weight")),
+                              DropdownMenuItem(value: 'maintain', child: Text("Maintain Weight")),
+                              DropdownMenuItem(value: 'lose', child: Text("Lose Weight")),
+                              DropdownMenuItem(value: 'gain', child: Text("Gain Weight")),
                             ],
+                            isExpanded: true,
+                            underline: Container(height: 1, color: Colors.grey[300]),
+                            style: const TextStyle(color: Colors.black87, fontSize: 16),
                           ),
-                          const SizedBox(height: 16),
-                          Table(
-                            border:
-                                TableBorder.all(color: Colors.grey, width: 0.5),
-                            columnWidths: const {
-                              0: FlexColumnWidth(2),
-                              1: FlexColumnWidth(3),
-                            },
-                            children: [
-                              _buildTableRow(
-                                  "BMI", dietPlan['bmi'].toStringAsFixed(1)),
-                              _buildTableRow("Target Calories",
-                                  "${dietPlan['calories'].toStringAsFixed(1)} kcal"),
-                              _buildTableRow("Protein",
-                                  "${dietPlan['protein'].toStringAsFixed(1)} g"),
-                              _buildTableRow("Fat",
-                                  "${dietPlan['fat'].toStringAsFixed(1)} g"),
-                              _buildTableRow("Carbs",
-                                  "${dietPlan['carbs'].toStringAsFixed(1)} g"),
-                              _buildTableRow("Sugar",
-                                  "${dietPlan['sugar'].toStringAsFixed(1)} g"),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            "Sample Foods:",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E3C72),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (warnings.isNotEmpty)
+                    Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Warnings",
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
+                            const SizedBox(height: 16),
+                            ...warnings.map((warning) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Text(
+                                    warning,
+                                    style: const TextStyle(fontSize: 16, color: Colors.red),
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.fastfood, color: Colors.green),
+                              SizedBox(width: 8),
+                              Text(
+                                "Today's Food Log",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                              ),
+                            ],
                           ),
-                          Text(
-                            _goal == 'lose'
-                                ? "- Brown rice (150g): 180 kcal, 4g protein, 1g fat, 38g carbs\n- Grilled chicken (100g): 165 kcal, 31g protein, 3g fat, 0g carbs\n- Steamed broccoli (100g): 35 kcal, 3g protein, 0g fat, 7g carbs"
-                                : _goal == 'gain'
-                                    ? "- Oatmeal (50g): 190 kcal, 6g protein, 3g fat, 32g carbs\n- Peanut butter (30g): 180 kcal, 7g protein, 16g fat, 6g carbs\n- Banana (120g): 90 kcal, 1g protein, 0g fat, 23g carbs"
-                                    : "- Whole wheat roti (50g): 150 kcal, 4g protein, 2g fat, 28g carbs\n- Lentil dal (100g): 120 kcal, 7g protein, 2g fat, 17g carbs\n- Mixed vegetables (100g): 50 kcal, 2g protein, 0g fat, 10g carbs",
-                            style: TextStyle(
-                                fontSize: 16, color: Colors.blueGrey[700]),
-                          ),
+                          const SizedBox(height: 16),
+                          _foodLog.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    "No foods logged today",
+                                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: DataTable(
+                                    columnSpacing: 16.0,
+                                    columns: const [
+                                      DataColumn(label: Text('Food', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                      DataColumn(label: Text('Calories', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                      DataColumn(label: Text('Protein (g)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                      DataColumn(label: Text('Fat (g)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                      DataColumn(label: Text('Carbs (g)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                      DataColumn(label: Text('Sugar (g)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                      DataColumn(label: Text('Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87))),
+                                    ],
+                                    rows: _foodLog.map((food) {
+                                      final totalCalories = (food['calories'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1);
+                                      final totalProtein = (food['protein'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1);
+                                      final totalFat = (food['fat'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1);
+                                      final totalCarbs = (food['carbs'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1);
+                                      final totalSugar = (food['sugar'] * (food['quantity'] ?? 1.0)).toStringAsFixed(1);
+                                      final quantity = (food['quantity'] ?? 1.0).toStringAsFixed(0);
+
+                                      return DataRow(
+                                        cells: [
+                                          DataCell(Text(food['name'] as String? ?? 'Unknown', style: const TextStyle(fontSize: 16, color: Colors.black87))),
+                                          DataCell(Text(totalCalories, style: const TextStyle(fontSize: 16, color: Colors.grey))),
+                                          DataCell(Text(totalProtein, style: const TextStyle(fontSize: 16, color: Colors.grey))),
+                                          DataCell(Text(totalFat, style: const TextStyle(fontSize: 16, color: Colors.grey))),
+                                          DataCell(Text(totalCarbs, style: const TextStyle(fontSize: 16, color: Colors.grey))),
+                                          DataCell(Text(totalSugar, style: const TextStyle(fontSize: 16, color: Colors.grey))),
+                                          DataCell(Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                onPressed: () => _updateQuantity(food['id'] as String?, (food['quantity'] as double? ?? 1.0) - 1),
+                                                icon: const Icon(Icons.remove, size: 20, color: Colors.green),
+                                              ),
+                                              Text(
+                                                quantity,
+                                                style: const TextStyle(fontSize: 16, color: Colors.black87),
+                                              ),
+                                              IconButton(
+                                                onPressed: () => _updateQuantity(food['id'] as String?, (food['quantity'] as double? ?? 1.0) + 1),
+                                                icon: const Icon(Icons.add, size: 20, color: Colors.green),
+                                              ),
+                                              IconButton(
+                                                onPressed: () => _removeFood(food['id'] as String?),
+                                                icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                                              ),
+                                            ],
+                                          )),
+                                        ],
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
                         ],
                       ),
                     ),
@@ -882,11 +714,14 @@ class _DietScreenState extends State<DietScreen> {
               ),
             ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1E3C72),
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: const Color(0xFF000000),
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
@@ -901,15 +736,94 @@ class _DietScreenState extends State<DietScreen> {
             label: 'Cart',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.food_bank_outlined),
             label: 'Diet',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profile',
+          ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Add Food"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _foodController,
+                    decoration: const InputDecoration(
+                      labelText: "Food Name (e.g., roti)",
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    _addFood();
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Add"),
+                ),
+              ],
+            ),
+          );
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar(String label, double current, double total, String unit) {
+    final percentage = (current / total).clamp(0.0, 1.0);
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.4 - 16,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "${current.toStringAsFixed(0)} / ${total.toStringAsFixed(0)}$unit",
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          CustomLinearProgressIndicator(
+            value: percentage,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomLinearProgressIndicator extends StatelessWidget {
+  final double value;
+
+  const CustomLinearProgressIndicator({super.key, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return LinearProgressIndicator(
+      value: value.clamp(0.0, 1.0),
+      backgroundColor: Colors.grey[300],
+      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+      minHeight: 8,
     );
   }
 }

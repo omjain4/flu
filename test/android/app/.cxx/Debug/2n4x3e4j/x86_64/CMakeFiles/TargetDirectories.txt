@@ -1,0 +1,2 @@
+D:/MiniProject/flu/test/android/app/.cxx/Debug/2n4x3e4j/x86_64/CMakeFiles/edit_cache.dir
+D:/MiniProject/flu/test/android/app/.cxx/Debug/2n4x3e4j/x86_64/CMakeFiles/rebuild_cache.dir

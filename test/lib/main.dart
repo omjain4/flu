@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:test/splash_psge.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'details_screen.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(), // Use SplashScreen with shorter timeout
+      home: SplashPsge(), // Use SplashScreen with shorter timeout
       routes: {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignupScreen(),
